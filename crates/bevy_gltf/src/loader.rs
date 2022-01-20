@@ -551,16 +551,20 @@ fn load_node(
                     AssetPath::new_ref(load_context.path(), Some(&material_label));
 
                 let bounds = primitive.bounding_box();
-                parent
-                    .spawn_bundle(PbrBundle {
-                        mesh: load_context.get_handle(mesh_asset_path),
-                        material: load_context.get_handle(material_asset_path),
-                        ..Default::default()
-                    })
-                    .insert(Aabb::from_min_max(
-                        Vec3::from_slice(&bounds.min),
-                        Vec3::from_slice(&bounds.max),
-                    ));
+                let mut pbr = parent.spawn_bundle(PbrBundle {
+                    mesh: load_context.get_handle(mesh_asset_path),
+                    material: load_context.get_handle(material_asset_path),
+                    ..Default::default()
+                });
+                pbr.insert(Aabb::from_min_max(
+                    Vec3::from_slice(&bounds.min),
+                    Vec3::from_slice(&bounds.max),
+                ));
+                if let Some(extras) = primitive.extras() {
+                    pbr.insert(super::GltfExtras {
+                        value: extras.get().to_string(),
+                    });
+                }
             }
         }
 
@@ -580,6 +584,11 @@ fn load_node(
                     if let Some(name) = light.name() {
                         entity.insert(Name::new(name.to_string()));
                     }
+                    if let Some(extras) = light.extras() {
+                        entity.insert(super::GltfExtras {
+                            value: extras.get().to_string(),
+                        });
+                    }
                 }
                 gltf::khr_lights_punctual::Kind::Point => {
                     let mut entity = parent.spawn_bundle(PointLightBundle {
@@ -597,6 +606,11 @@ fn load_node(
                     });
                     if let Some(name) = light.name() {
                         entity.insert(Name::new(name.to_string()));
+                    }
+                    if let Some(extras) = light.extras() {
+                        entity.insert(super::GltfExtras {
+                            value: extras.get().to_string(),
+                        });
                     }
                 }
                 gltf::khr_lights_punctual::Kind::Spot {
