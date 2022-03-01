@@ -49,6 +49,7 @@ pub struct GltfNode {
     pub children: Vec<GltfNode>,
     pub mesh: Option<Handle<GltfMesh>>,
     pub transform: bevy_transform::prelude::Transform,
+    pub extras: Option<String>
 }
 
 /// A glTF mesh, which may consists of multiple [`GtlfPrimitives`](GltfPrimitive).
@@ -56,6 +57,7 @@ pub struct GltfNode {
 #[uuid = "8ceaec9a-926a-4f29-8ee3-578a69f42315"]
 pub struct GltfMesh {
     pub primitives: Vec<GltfPrimitive>,
+    pub extras: Option<String>
 }
 
 /// Part of a [`GltfMesh`] that consists of a [`Mesh`] and an optional [`StandardMaterial`].
@@ -64,6 +66,7 @@ pub struct GltfMesh {
 pub struct GltfPrimitive {
     pub mesh: Handle<Mesh>,
     pub material: Option<Handle<StandardMaterial>>,
+    pub extras: Option<String>
 }
 
 #[derive(Clone, Debug, Reflect, Default, Component)]

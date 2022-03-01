@@ -79,6 +79,11 @@ impl AssetLoader for GltfLoader {
     }
 }
 
+#[inline]
+fn extras_convert(e: &gltf::json::Extras) -> Option<String> {
+    e.as_ref().map(|v| String::from(v.get()))
+}
+
 /// Loads an entire glTF file.
 async fn load_gltf<'a, 'b>(
     bytes: &'a [u8],
@@ -187,11 +192,15 @@ async fn load_gltf<'a, 'b>(
                     .material()
                     .index()
                     .and_then(|i| materials.get(i).cloned()),
+                extras: extras_convert(primitive.extras()),
             });
         }
         let handle = load_context.set_labeled_asset(
             &mesh_label(&mesh),
-            LoadedAsset::new(super::GltfMesh { primitives }),
+            LoadedAsset::new(super::GltfMesh {
+                primitives,
+                extras: extras_convert(mesh.extras()),
+            }),
         );
         if let Some(name) = mesh.name() {
             named_meshes.insert(name.to_string(), handle.clone());
@@ -225,6 +234,7 @@ async fn load_gltf<'a, 'b>(
                         scale: bevy_math::Vec3::from(scale),
                     },
                 },
+                extras: extras_convert(node.extras())
             },
             node.children()
                 .map(|child| child.index())
@@ -891,6 +901,7 @@ mod test {
                 children: vec![],
                 mesh: None,
                 transform: bevy_transform::prelude::Transform::identity(),
+                extras: None
             }
         }
     }
